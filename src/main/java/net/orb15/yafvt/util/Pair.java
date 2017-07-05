@@ -28,4 +28,13 @@ public class Pair<M, N> {
         this.n = n;
     }
 
+    @Override
+    public String toString() {
+        return "Pair{" +
+                "m=" + m +
+                ", n=" + n +
+                '}';
+    }
+
+
 }

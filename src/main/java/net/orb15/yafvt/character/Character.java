@@ -7,7 +7,6 @@ public class Character {
 
     private Map<Skill, Integer> skillMap = new HashMap<>();
     private WoundMonitor wounds = WoundMonitor.defaultValued();
-
     private Skill currentWeapon;
     private ArmorLevel currentArmor;
     private String name;
@@ -81,5 +80,15 @@ public class Character {
         return new Character (skillMap, wounds, currentWeapon, currentArmor,
                 name, propFileName);
 
+    }
+
+    @Override
+    public String toString() {
+        return "skillMap=" + skillMap +
+                "\nwounds=" + wounds +
+                "\ncurrentWeapon=" + currentWeapon +
+                "\ncurrentArmor=" + currentArmor +
+                "\nname=" + name +
+                "\npropertySource=" + propertySource;
     }
 }

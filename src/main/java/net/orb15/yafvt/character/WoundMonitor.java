@@ -202,4 +202,16 @@ public class WoundMonitor {
         }
     }
 
+    @Override
+    public String toString() {
+        return "WoundMonitor{" +
+                "scratches=" + scratches +
+                ", lightWounds=" + lightWounds +
+                ", moderateWounds=" + moderateWounds +
+                ", heavyWounds=" + heavyWounds +
+                ", woundLevel=" + woundLevel +
+                ", incapacitated=" + incapacitated +
+                '}';
+    }
+
 }
