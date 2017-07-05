@@ -1,2 +1,14 @@
 #!/bin/bash
-java -jar target/yafvt-0.0.1-SNAPSHOT.jar
+
+cd target
+
+if [ -d characters ]
+then
+    rm -f characters/*.properties
+else
+    mkdir characters
+fi
+
+cp ../src/test/resources/*.properties characters
+
+java -jar yafvt-0.0.1-SNAPSHOT.jar
