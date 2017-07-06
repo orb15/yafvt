@@ -1,5 +1,6 @@
 package net.orb15.yafvt.console;
 
+import net.orb15.yafvt.util.SystemState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,18 +21,10 @@ import java.util.regex.Pattern;
 public class ConsoleBean implements CommandLineRunner {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConsoleBean.class);
-
-    private final Pattern loadCharPattern = Pattern.compile("load (.*) as (.*)");
-    private final Pattern historyPattern = Pattern.compile("h([0-9]+)");
-    private final Pattern charListPattern = Pattern.compile("show chars");
-    private final Pattern showCharPattern = Pattern.compile("show char (.*)");
-    private final Pattern showHelpPattern = Pattern.compile("help");
-    private final Pattern killStatePattern = Pattern.compile("state kill");
-
     private List<String> cmdHistory = new ArrayList<>();
     private SystemState state;
 
-    private Map<Pattern, BiConsumer<Matcher, String>> cliMap;
+    private Map<Command, BiConsumer<Matcher, String>> cliMap;
 
     @Autowired
     ConsoleBean(SystemState state) {
@@ -53,13 +46,28 @@ public class ConsoleBean implements CommandLineRunner {
     private void loadMap() {
 
         cliMap = new HashMap<>();
+        Command c = null;
 
-        cliMap.put(loadCharPattern, this::loadCharacter);
-        cliMap.put(historyPattern, this::showHistory);
-        cliMap.put(charListPattern, this::characterList);
-        cliMap.put(showCharPattern, this::showCharacter);
-        cliMap.put(showHelpPattern, this::showHelp);
-        cliMap.put(killStatePattern, this::killState);
+        c = new Command("load (.*) as (.*)", "load {propfile} as {char name}\tLoad a character from prop file");
+        cliMap.put(c, this::loadCharacter);
+
+        c = new Command("h([0-9]+)", "h{x}\t\t\t\tShow the last x commands");
+        cliMap.put(c, this::showHistory);
+
+        c = new Command("show chars", "show chars\t\t\tShow all loaded characters");
+        cliMap.put(c, this::characterList);
+
+        c = new Command("show char (.*)", "show chars {char name}\t\tShow the details for the given character");
+        cliMap.put(c, this::showCharacter);
+
+        c = new Command("help", "help\t\t\t\tShow this help text");
+        cliMap.put(c, this::showHelp);
+
+        c = new Command("\\?", "?\t\t\t\tShow this help text");
+        cliMap.put(c, this::showHelp);
+
+        c = new Command("state kill", "state kill\t\t\tCompletely reset system state");
+        cliMap.put(c, this::killState);
     }
 
     private void executePrompt() {
@@ -76,8 +84,10 @@ public class ConsoleBean implements CommandLineRunner {
             if(command.length() == 0)
                 continue;
 
-            if(command.compareTo("exit") == 0 || command.compareTo("quit") == 0)
+            if(command.compareTo("exit") == 0 || command.compareTo("quit") == 0) {
                 keepRunning = false;
+                continue;
+            }
 
             if(!handleCommand(command)) {
                 System.out.println("Invalid command: " + command);
@@ -89,14 +99,17 @@ public class ConsoleBean implements CommandLineRunner {
 
         boolean cmdMatched = false;
 
-        Set<Pattern> keys = cliMap.keySet();
-        Optional<Pattern> optPattern = keys.stream().filter(p -> p.matcher(cmd).matches()).findFirst();
-        if(optPattern.isPresent()) {
+        Set<Command> keys = cliMap.keySet();
+        Optional<Command> optCommand = keys.stream().
+                filter(c -> c.getPattern().matcher(cmd).matches())
+                .findFirst();
+
+        if(optCommand.isPresent()) {
             cmdMatched = true;
-            Pattern p = optPattern.get();
-            Matcher m = p.matcher(cmd);
+            Command c = optCommand.get();
+            Matcher m = c.getPattern().matcher(cmd);
             m.matches();
-            cliMap.get(p).accept(m,cmd);
+            cliMap.get(c).accept(m,cmd);
         }
 
         return cmdMatched;
@@ -104,20 +117,31 @@ public class ConsoleBean implements CommandLineRunner {
 
     private void killState(Matcher m, String cmd) {
 
-        state.clearAll();
-        cmdHistory.add(0,cmd);
+        System.out.print("\tThis will DESTROY all state data! Are you sure [NO]? ");
+        String response = System.console().readLine().trim();
+
+        if(response.compareTo("YES") == 0) {
+            state.clearAll();
+            cmdHistory.add(0, cmd);
+            System.out.println("\nSystem state cleared.\n");
+        }
     }
 
     private void showHelp(Matcher m, String cmd) {
 
-        System.out.println("Load a character from prop file: " + loadCharPattern.toString());
-        System.out.println("Show command history: " + historyPattern.toString());
-        System.out.println("List loaded characters: " + charListPattern.toString());
-        System.out.println("Show a given character: " + showCharPattern.toString());
-        System.out.println("Clear the current system state: " + killStatePattern.toString());
+        System.out.println();
+
+        Set<Command> keys = cliMap.keySet();
+        keys.stream()
+                .sorted( (c1, c2) -> c1.getHelpText().compareToIgnoreCase(c2.getHelpText()))
+                .forEach(e -> System.out.println(e.getHelpText()));
+
+        System.out.println();
     }
 
     private void showCharacter(Matcher m, String cmd) {
+
+        System.out.println();
 
         String charName = m.group(1);
 
@@ -130,13 +154,21 @@ public class ConsoleBean implements CommandLineRunner {
             System.out.println(String.format("No character named: %s exists", charName));
         }
 
+        System.out.println();
+
+
         cmdHistory.add(0,cmd);
     }
 
     private void characterList(Matcher m, String cmd) {
 
-        state.getCharacterNames().stream().forEach(s -> System.out.println(s));
+        System.out.println();
+
+        state.getCharacterNames().stream()
+                .forEach(s -> System.out.println(s));
         cmdHistory.add(0,cmd);
+
+        System.out.println();
     }
 
     private void showHistory(Matcher m, String cmd) {
@@ -145,6 +177,8 @@ public class ConsoleBean implements CommandLineRunner {
 
         if(size == 0)
             return;
+
+        System.out.println();
 
         int count = Integer.parseInt(m.group(1));
 
@@ -156,6 +190,8 @@ public class ConsoleBean implements CommandLineRunner {
             System.out.println(cmdHistory.get(shown));
             shown++;
         }
+
+        System.out.println();
     }
 
     private void loadCharacter(Matcher m, String cmd) {
@@ -169,6 +205,8 @@ public class ConsoleBean implements CommandLineRunner {
 
         try {
 
+            System.out.println();
+
             input = new FileInputStream("characters/" + propFileName + ".properties");
             props.load(input);
 
@@ -181,6 +219,9 @@ public class ConsoleBean implements CommandLineRunner {
             LOG.error("Can't find or load the properties file: {}", propFileName, ex);
             System.out.println("Unable to load file: " + propFileName);
         } finally {
+
+            System.out.println();
+
             if (input != null) {
                 try {
                     input.close();
@@ -189,5 +230,26 @@ public class ConsoleBean implements CommandLineRunner {
                 }
             }
         }
+    }
+
+
+    private class Command {
+
+        private Pattern pattern;
+        private String helpText;
+
+        protected Command(String patternString, String helpText) {
+            this.pattern = Pattern.compile(patternString);
+            this.helpText = helpText;
+        }
+
+        public Pattern getPattern() {
+            return pattern;
+        }
+
+        public String getHelpText() {
+            return helpText;
+        }
+
     }
 }

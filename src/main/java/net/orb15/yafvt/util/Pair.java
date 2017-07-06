@@ -1,38 +1,38 @@
 package net.orb15.yafvt.util;
 
-public class Pair<M, N> {
+public class Pair<T, R> {
 
-    private M m;
-    private N n;
+    private T t;
+    private R r;
 
     public Pair() {}
 
-    public Pair(M m, N n) {
-        this.m = m;
-        this.n = n;
+    public Pair(T t, R r) {
+        this.t = t;
+        this.r = r;
     }
 
-    public M getM() {
-        return m;
+    public T getT() {
+        return t;
     }
 
-    public void setM(M m) {
-        this.m = m;
+    public void setT(T t) {
+        this.t = t;
     }
 
-    public N getN() {
-        return n;
+    public R getR() {
+        return r;
     }
 
-    public void setN(N n) {
-        this.n = n;
+    public void setR(R r) {
+        this.r = r;
     }
 
     @Override
     public String toString() {
         return "Pair{" +
-                "m=" + m +
-                ", n=" + n +
+                "t=" + t +
+                ", r=" + r +
                 '}';
     }
 

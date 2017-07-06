@@ -1,4 +1,4 @@
-package net.orb15.yafvt.console;
+package net.orb15.yafvt.util;
 
 import org.springframework.stereotype.Component;
 
@@ -26,7 +26,7 @@ public class SystemState {
         return Optional.ofNullable(characters.get(name));
     }
 
-    List<String> getCharacterNames() {
+    public List<String> getCharacterNames() {
         return characters.keySet().stream().collect(Collectors.toList());
     }
 

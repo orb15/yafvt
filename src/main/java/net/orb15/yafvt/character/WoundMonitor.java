@@ -91,10 +91,10 @@ public class WoundMonitor {
     }
 
     public void healAllDamage() {
-        scratches.setN(scratches.getM());
-        lightWounds.setN(scratches.getM());
-        moderateWounds.setN(scratches.getM());
-        heavyWounds.setN(scratches.getM());
+        scratches.setR(scratches.getT());
+        lightWounds.setR(scratches.getT());
+        moderateWounds.setR(scratches.getT());
+        heavyWounds.setR(scratches.getT());
     }
     
     public WoundLevel applyNetDamage(int netDamage) {
@@ -125,19 +125,19 @@ public class WoundMonitor {
         if(incapacitated)
             return WoundLevel.INCAPACITATED;
 
-        int now = heavyWounds.getN();
+        int now = heavyWounds.getR();
         if(now > 0)
             return WoundLevel.HEAVY;
 
-        now = moderateWounds.getN();
+        now = moderateWounds.getR();
         if(now > 0)
             return WoundLevel.MODERATE;
 
-        now = lightWounds.getN();
+        now = lightWounds.getR();
         if(now > 0)
             return WoundLevel.LIGHT;
 
-        now = scratches.getN();
+        now = scratches.getR();
         if(now > 0)
             return WoundLevel.SCRATCHED;
 
@@ -147,57 +147,57 @@ public class WoundMonitor {
     
     private WoundLevel applyScratch() {
 
-        int now = scratches.getN();
-        int max = scratches.getM();
+        int now = scratches.getR();
+        int max = scratches.getT();
         
         if(now == max) {
             return applyLight();
         }
         
         now++;
-        scratches.setN(now);
+        scratches.setR(now);
         return determineWoundLevel();
     }
 
     private WoundLevel applyLight() {
 
-        int now = lightWounds.getN();
-        int max = lightWounds.getM();
+        int now = lightWounds.getR();
+        int max = lightWounds.getT();
 
         if(now == max) {
             return applyModerate();
         }
 
         now++;
-        lightWounds.setN(now);
+        lightWounds.setR(now);
         return determineWoundLevel();
     }
 
     private WoundLevel applyModerate() {
 
-        int now = moderateWounds.getN();
-        int max = moderateWounds.getM();
+        int now = moderateWounds.getR();
+        int max = moderateWounds.getT();
 
         if(now == max) {
             return applyHeavy();
         }
 
         now++;
-        moderateWounds.setN(now);
+        moderateWounds.setR(now);
         return determineWoundLevel();
     }
 
     private WoundLevel applyHeavy() {
 
-        int now = heavyWounds.getN();
-        int max = heavyWounds.getM();
+        int now = heavyWounds.getR();
+        int max = heavyWounds.getT();
 
         if(now == max) {
             incapacitated = true;
             return WoundLevel.INCAPACITATED;
         } else {
             now++;
-            heavyWounds.setN(now);
+            heavyWounds.setR(now);
             return WoundLevel.HEAVY;
         }
     }
