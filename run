@@ -9,6 +9,14 @@ else
     mkdir characters
 fi
 
-cp ../src/test/resources/*.properties characters
+if [ -d areans ]
+then
+    rm -f arenas/*.properties
+else
+    mkdir arenas
+fi
+
+cp ../src/test/resources/char.*.properties characters
+cp ../src/test/resources/arena.*.properties characters
 
 java -jar yafvt-0.0.1-SNAPSHOT.jar

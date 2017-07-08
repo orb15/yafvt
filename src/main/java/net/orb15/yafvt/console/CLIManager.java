@@ -1,5 +1,8 @@
 package net.orb15.yafvt.console;
 
+import net.orb15.yafvt.arena.Arena;
+import net.orb15.yafvt.arena.ArenaManager;
+import net.orb15.yafvt.util.PropertyFileLoader;
 import net.orb15.yafvt.util.SystemState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,8 +12,6 @@ import org.springframework.stereotype.Component;
 import net.orb15.yafvt.character.Character;
 
 import java.io.Console;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
@@ -18,29 +19,23 @@ import java.util.regex.Pattern;
 
 
 @Component
-public class ConsoleBean implements CommandLineRunner {
+public class CLIManager implements CommandLineRunner {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ConsoleBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CLIManager.class);
+
     private List<String> cmdHistory = new ArrayList<>();
     private SystemState state;
+    private PropertyFileLoader propertyFileLoader;
+    private ArenaManager arenaManager;
 
     private Map<Command, BiConsumer<Matcher, String>> cliMap;
 
     @Autowired
-    ConsoleBean(SystemState state) {
+    CLIManager(SystemState state, PropertyFileLoader propertyFileLoader, ArenaManager arenaManager) {
         this.state = state;
-
+        this.propertyFileLoader = propertyFileLoader;
+        this.arenaManager = arenaManager;
         loadMap();
-    }
-
-    @Override
-    public void run(String... strings) throws Exception {
-
-        LOG.debug("Command line application starting...");
-
-        System.out.println();
-        executePrompt();
-        System.out.println();
     }
 
     private void loadMap() {
@@ -48,7 +43,7 @@ public class ConsoleBean implements CommandLineRunner {
         cliMap = new HashMap<>();
         Command c = null;
 
-        c = new Command("load (.*) as (.*)", "load {propfile} as {char name}\tLoad a character from prop file");
+        c = new Command("load char (.*) as (.*)", "load {propfile} as {char name}\tLoad a character from prop file");
         cliMap.put(c, this::loadCharacter);
 
         c = new Command("h([0-9]+)", "h{x}\t\t\t\tShow the last x commands");
@@ -70,6 +65,16 @@ public class ConsoleBean implements CommandLineRunner {
         cliMap.put(c, this::killState);
     }
 
+    @Override
+    public void run(String... strings) throws Exception {
+
+        LOG.debug("Command line application starting...");
+
+        System.out.println();
+        executePrompt();
+        System.out.println();
+    }
+
     private void executePrompt() {
 
         Console console = System.console();
@@ -86,6 +91,7 @@ public class ConsoleBean implements CommandLineRunner {
 
             if(command.compareTo("exit") == 0 || command.compareTo("quit") == 0) {
                 keepRunning = false;
+                arenaManager.runArena();
                 continue;
             }
 
@@ -196,40 +202,22 @@ public class ConsoleBean implements CommandLineRunner {
 
     private void loadCharacter(Matcher m, String cmd) {
 
-        InputStream input = null;
-        Properties props = new Properties();
-        Character character = null;
-
         String propFileName = m.group(1);
         String charName = m.group(2);
 
-        try {
+        Optional<Properties> propsOpt = propertyFileLoader.load(propFileName,
+                PropertyFileLoader.PropertyFileType.CHARACTER);
 
-            System.out.println();
+        System.out.println();
 
-            input = new FileInputStream("characters/" + propFileName + ".properties");
-            props.load(input);
-
-            character = Character.fromProperties(props, propFileName, charName);
+        if(propsOpt.isPresent()) {
+            Character character = Character.fromProperties(propsOpt.get(), propFileName, charName);
             state.storeCharacter(character);
-            System.out.println("properties file loaded");
-            cmdHistory.add(0,cmd);
-
-        } catch (Exception ex) {
-            LOG.error("Can't find or load the properties file: {}", propFileName, ex);
-            System.out.println("Unable to load file: " + propFileName);
-        } finally {
-
-            System.out.println();
-
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (Exception ex) {
-                    LOG.error("Can't close the properties file: {}", propFileName, ex);
-                }
-            }
+            System.out.println("Character loaded");
+        } else {
+            System.out.println("Character NOT loaded");
         }
+
     }
 
 
