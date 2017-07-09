@@ -15,12 +15,22 @@ public class CombatAlgorithm {
 
     private static final Logger LOG = LoggerFactory.getLogger(CombatAlgorithm.class);
 
-    public static BiFunction<Character, Character, WoundLevel> getCombatAlgorithm() {
+    public enum AlgorithmType {
 
-        //some logic will go here allowing me to return various functions
-        //for now just call a private method to return the function
+        DEFAULT;
+    }
 
-        return defaultCombatAlgorithm();
+    public static BiFunction<Character, Character, WoundLevel> getCombatAlgorithm(AlgorithmType type) {
+
+        switch(type) {
+
+            case DEFAULT:
+                return defaultCombatAlgorithm();
+
+            default:
+                throw new UnsupportedOperationException("AlgorithmType: " + type + " is not supported");
+        }
+
     }
 
     private static BiFunction<Character, Character, WoundLevel> defaultCombatAlgorithm() {

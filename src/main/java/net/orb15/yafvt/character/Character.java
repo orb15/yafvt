@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 public class Character {
 
-    private Map<Skill, Integer> skillMap = new HashMap<>();
+    private Map<Skill, Integer> skillMap;
     private WoundMonitor wounds = WoundMonitor.defaultValued();
     private Skill currentWeapon;
     private ArmorLevel currentArmor;

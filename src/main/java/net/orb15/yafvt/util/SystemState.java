@@ -1,5 +1,6 @@
 package net.orb15.yafvt.util;
 
+import net.orb15.yafvt.arena.Arena;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -12,11 +13,8 @@ import net.orb15.yafvt.character.Character;
 @Component
 public class SystemState {
 
-    private Map<String, Character> characters;
-
-    SystemState() {
-        characters = new HashMap<>();
-    }
+    private Map<String, Character> characters = new HashMap<>();
+    private Map<String, Arena> arenas = new HashMap<>();
 
     public void storeCharacter(Character c) {
         characters.put(c.getName(), c);
@@ -30,7 +28,20 @@ public class SystemState {
         return characters.keySet().stream().collect(Collectors.toList());
     }
 
+    public void storeArena(Arena a) {
+        arenas.put(a.getName(), a);
+    }
+
+    public Optional<Arena> getArena(String name) {
+        return Optional.ofNullable(arenas.get(name));
+    }
+
+    public List<String> getArenaNames() {
+        return arenas.keySet().stream().collect(Collectors.toList());
+    }
+
     public void clearAll() {
         characters.clear();
+        arenas.clear();
     }
 }

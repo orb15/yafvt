@@ -73,7 +73,7 @@ public class PropertyFileLoader {
             }
         }
 
-        return Optional.of(props);
+        return Optional.ofNullable(props);
     }
 
 }

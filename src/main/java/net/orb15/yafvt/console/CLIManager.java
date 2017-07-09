@@ -43,26 +43,35 @@ public class CLIManager implements CommandLineRunner {
         cliMap = new HashMap<>();
         Command c = null;
 
-        c = new Command("load char (.*) as (.*)", "load {propfile} as {char name}\tLoad a character from prop file");
+        c = new Command("load char (.*) as (.*)", "load char {propfile} as {char name}\tLoad a character from prop file");
         cliMap.put(c, this::loadCharacter);
 
-        c = new Command("h([0-9]+)", "h{x}\t\t\t\tShow the last x commands");
-        cliMap.put(c, this::showHistory);
-
-        c = new Command("show chars", "show chars\t\t\tShow all loaded characters");
+        c = new Command("show chars", "show chars\t\t\t\tShow all loaded characters");
         cliMap.put(c, this::characterList);
 
-        c = new Command("show char (.*)", "show chars {char name}\t\tShow the details for the given character");
+        c = new Command("show char (.*)", "show chars {char name}\t\t\tShow the details for the given character");
         cliMap.put(c, this::showCharacter);
 
-        c = new Command("help", "help\t\t\t\tShow this help text");
+        c = new Command("load arena (.*) as (.*)", "load arena {propfile} as {arena name}\tLoad an arena from prop file");
+        cliMap.put(c, this::loadArena);
+
+        c = new Command("show arenas", "show arenas\t\t\t\tShow all loaded arenas");
+        cliMap.put(c, this::arenaList);
+
+        c = new Command("show arena (.*)", "show arena {arena name}\t\t\tShow the details for the given arena");
+        cliMap.put(c, this::showArena);
+
+        c = new Command("h([0-9]+)", "h{x}\t\t\t\t\tShow the last x commands");
+        cliMap.put(c, this::showHistory);
+
+        c = new Command("help", "help\t\t\t\t\tShow this help text");
         cliMap.put(c, this::showHelp);
 
-        c = new Command("\\?", "?\t\t\t\tShow this help text");
+        c = new Command("\\?", "?\t\t\t\t\tShow this help text");
         cliMap.put(c, this::showHelp);
 
-        c = new Command("state kill", "state kill\t\t\tCompletely reset system state");
-        cliMap.put(c, this::killState);
+        c = new Command("state kill all", "state kill all\t\t\t\tCompletely reset system state");
+        cliMap.put(c, this::killAllState);
     }
 
     @Override
@@ -91,7 +100,6 @@ public class CLIManager implements CommandLineRunner {
 
             if(command.compareTo("exit") == 0 || command.compareTo("quit") == 0) {
                 keepRunning = false;
-                arenaManager.runArena();
                 continue;
             }
 
@@ -121,7 +129,7 @@ public class CLIManager implements CommandLineRunner {
         return cmdMatched;
     }
 
-    private void killState(Matcher m, String cmd) {
+    private void killAllState(Matcher m, String cmd) {
 
         System.out.print("\tThis will DESTROY all state data! Are you sure [NO]? ");
         String response = System.console().readLine().trim();
@@ -166,11 +174,43 @@ public class CLIManager implements CommandLineRunner {
         cmdHistory.add(0,cmd);
     }
 
+    private void showArena(Matcher m, String cmd) {
+
+        System.out.println();
+
+        String arenaName = m.group(1);
+
+        Optional<Arena> optArena = state.getArena(arenaName);
+        if(optArena.isPresent()) {
+
+            System.out.println(optArena.get().toString());
+
+        } else {
+            System.out.println(String.format("No arena named: %s exists", arenaName));
+        }
+
+        System.out.println();
+
+
+        cmdHistory.add(0,cmd);
+    }
+
     private void characterList(Matcher m, String cmd) {
 
         System.out.println();
 
         state.getCharacterNames().stream()
+                .forEach(s -> System.out.println(s));
+        cmdHistory.add(0,cmd);
+
+        System.out.println();
+    }
+
+    private void arenaList(Matcher m, String cmd) {
+
+        System.out.println();
+
+        state.getArenaNames().stream()
                 .forEach(s -> System.out.println(s));
         cmdHistory.add(0,cmd);
 
@@ -217,6 +257,30 @@ public class CLIManager implements CommandLineRunner {
         } else {
             System.out.println("Character NOT loaded");
         }
+
+        System.out.println();
+
+    }
+
+    private void loadArena(Matcher m, String cmd) {
+
+        String propFileName = m.group(1);
+        String arenaName = m.group(2);
+
+        Optional<Properties> propsOpt = propertyFileLoader.load(propFileName,
+                PropertyFileLoader.PropertyFileType.ARENA);
+
+        System.out.println();
+
+        if(propsOpt.isPresent()) {
+            Arena arena = Arena.fromProperties(propsOpt.get(), propFileName, arenaName);
+            state.storeArena(arena);
+            System.out.println("Arena loaded");
+        } else {
+            System.out.println("Arena NOT loaded");
+        }
+
+        System.out.println();
 
     }
 
