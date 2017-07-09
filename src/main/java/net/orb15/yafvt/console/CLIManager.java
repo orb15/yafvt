@@ -70,6 +70,9 @@ public class CLIManager implements CommandLineRunner {
         c = new Command("\\?", "?\t\t\t\t\tShow this help text");
         cliMap.put(c, this::showHelp);
 
+        c = new Command("fight (.*) (.*) in (.*)", "fight {char1} {char2} in {arena}\t\t\tBegin a series of battles in an arena");
+        cliMap.put(c, this::fight);
+
         c = new Command("state kill all", "state kill all\t\t\t\tCompletely reset system state");
         cliMap.put(c, this::killAllState);
     }
@@ -123,7 +126,9 @@ public class CLIManager implements CommandLineRunner {
             Command c = optCommand.get();
             Matcher m = c.getPattern().matcher(cmd);
             m.matches();
+            System.out.println();
             cliMap.get(c).accept(m,cmd);
+            System.out.println();
         }
 
         return cmdMatched;
@@ -137,25 +142,20 @@ public class CLIManager implements CommandLineRunner {
         if(response.compareTo("YES") == 0) {
             state.clearAll();
             cmdHistory.add(0, cmd);
-            System.out.println("\nSystem state cleared.\n");
+            System.out.println("System state cleared.");
         }
     }
 
     private void showHelp(Matcher m, String cmd) {
-
-        System.out.println();
 
         Set<Command> keys = cliMap.keySet();
         keys.stream()
                 .sorted( (c1, c2) -> c1.getHelpText().compareToIgnoreCase(c2.getHelpText()))
                 .forEach(e -> System.out.println(e.getHelpText()));
 
-        System.out.println();
     }
 
     private void showCharacter(Matcher m, String cmd) {
-
-        System.out.println();
 
         String charName = m.group(1);
 
@@ -168,15 +168,10 @@ public class CLIManager implements CommandLineRunner {
             System.out.println(String.format("No character named: %s exists", charName));
         }
 
-        System.out.println();
-
-
         cmdHistory.add(0,cmd);
     }
 
     private void showArena(Matcher m, String cmd) {
-
-        System.out.println();
 
         String arenaName = m.group(1);
 
@@ -189,32 +184,23 @@ public class CLIManager implements CommandLineRunner {
             System.out.println(String.format("No arena named: %s exists", arenaName));
         }
 
-        System.out.println();
-
-
         cmdHistory.add(0,cmd);
     }
 
     private void characterList(Matcher m, String cmd) {
 
-        System.out.println();
-
         state.getCharacterNames().stream()
                 .forEach(s -> System.out.println(s));
-        cmdHistory.add(0,cmd);
 
-        System.out.println();
+        cmdHistory.add(0,cmd);
     }
 
     private void arenaList(Matcher m, String cmd) {
 
-        System.out.println();
-
         state.getArenaNames().stream()
                 .forEach(s -> System.out.println(s));
-        cmdHistory.add(0,cmd);
 
-        System.out.println();
+        cmdHistory.add(0,cmd);
     }
 
     private void showHistory(Matcher m, String cmd) {
@@ -223,8 +209,6 @@ public class CLIManager implements CommandLineRunner {
 
         if(size == 0)
             return;
-
-        System.out.println();
 
         int count = Integer.parseInt(m.group(1));
 
@@ -237,7 +221,6 @@ public class CLIManager implements CommandLineRunner {
             shown++;
         }
 
-        System.out.println();
     }
 
     private void loadCharacter(Matcher m, String cmd) {
@@ -248,8 +231,6 @@ public class CLIManager implements CommandLineRunner {
         Optional<Properties> propsOpt = propertyFileLoader.load(propFileName,
                 PropertyFileLoader.PropertyFileType.CHARACTER);
 
-        System.out.println();
-
         if(propsOpt.isPresent()) {
             Character character = Character.fromProperties(propsOpt.get(), propFileName, charName);
             state.storeCharacter(character);
@@ -258,7 +239,7 @@ public class CLIManager implements CommandLineRunner {
             System.out.println("Character NOT loaded");
         }
 
-        System.out.println();
+        cmdHistory.add(0,cmd);
 
     }
 
@@ -270,8 +251,6 @@ public class CLIManager implements CommandLineRunner {
         Optional<Properties> propsOpt = propertyFileLoader.load(propFileName,
                 PropertyFileLoader.PropertyFileType.ARENA);
 
-        System.out.println();
-
         if(propsOpt.isPresent()) {
             Arena arena = Arena.fromProperties(propsOpt.get(), propFileName, arenaName);
             state.storeArena(arena);
@@ -280,8 +259,76 @@ public class CLIManager implements CommandLineRunner {
             System.out.println("Arena NOT loaded");
         }
 
-        System.out.println();
+        cmdHistory.add(0,cmd);
+    }
 
+    private void fight(Matcher m, String cmd) {
+
+        String char1Name = m.group(1);
+        String char2Name = m.group(2);
+        String arenaName = m.group(3);
+
+        Optional<Character> char1Opt = prepareCharacter(char1Name);
+        Optional<Character> char2Opt = prepareCharacter(char2Name);
+        Optional<Arena> arenaOpt = prepareArena(arenaName);
+
+        if(char1Opt.isPresent() && char2Opt.isPresent() && arenaOpt.isPresent()) {
+
+            arenaManager.runArena(arenaOpt.get(), char1Opt.get(), char2Opt.get());
+
+            System.out.println("fight started");
+
+        }
+    }
+
+    private Optional<Character> prepareCharacter(String charName) {
+
+        Character character = null;
+
+        Optional<Character> charOpt = state.getCharacter(charName);
+        if(charOpt.isPresent()) {
+
+            character = charOpt.get();
+            if(character.isInUse()) {
+
+                LOG.debug("Character {} is already in use and cannot be used right now",
+                        charName);
+                System.out.println("Character: " + charName + "is already busy in a battle");
+            }
+
+        } else {
+
+            LOG.debug("Character {} does not exist and cannot be used in a battle.",
+                    charName);
+            System.out.println("Character: " + charName + "has not been loaded");
+        }
+
+        return Optional.ofNullable(character);
+    }
+
+    private Optional<Arena> prepareArena(String arenaName) {
+
+        Arena arena = null;
+
+        Optional<Arena> arenaOpt = state.getArena(arenaName);
+        if(arenaOpt.isPresent()) {
+
+            arena = arenaOpt.get();
+            if(arena.isInUse()) {
+
+                LOG.debug("Arena {} is already in use and cannot be used right now",
+                        arenaName);
+                System.out.println("Arena: " + arenaName + "is already busy in a battle");
+            }
+
+        } else {
+
+            LOG.debug("Arena {} does not exist and cannot be used in a battle.",
+                    arenaName);
+            System.out.println("Arena: " + arenaName + "has not been loaded");
+        }
+
+        return Optional.ofNullable(arena);
     }
 
 

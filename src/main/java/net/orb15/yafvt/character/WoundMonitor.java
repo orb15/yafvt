@@ -13,7 +13,8 @@ public class WoundMonitor {
     private WoundLevel woundLevel;
     private boolean incapacitated;
 
-    protected WoundMonitor(Pair s, Pair l, Pair m, Pair h) {
+    protected WoundMonitor(Pair<Integer, Integer> s, Pair<Integer, Integer> l,
+                           Pair<Integer, Integer> m, Pair<Integer, Integer> h) {
         this.scratches = s;
         this.lightWounds = l;
         this.moderateWounds = m;
@@ -63,26 +64,26 @@ public class WoundMonitor {
             }
 
             case 5: {
-                Pair<Integer, Integer> scratch = new Pair(3, 0);
-                Pair<Integer, Integer> light = new Pair(3, 0);
-                Pair<Integer, Integer> mod = new Pair(3, 0);
-                Pair<Integer, Integer> heavy = new Pair(1, 0);
+                Pair<Integer, Integer> scratch = new Pair<>(3, 0);
+                Pair<Integer, Integer> light = new Pair<>(3, 0);
+                Pair<Integer, Integer> mod = new Pair<>(3, 0);
+                Pair<Integer, Integer> heavy = new Pair<>(1, 0);
                 return new WoundMonitor(scratch, light, mod, heavy);
             }
 
             case 6: {
-                Pair<Integer, Integer> scratch = new Pair(3, 0);
-                Pair<Integer, Integer> light = new Pair(3, 0);
-                Pair<Integer, Integer> mod = new Pair(3, 0);
-                Pair<Integer, Integer> heavy = new Pair(2, 0);
+                Pair<Integer, Integer> scratch = new Pair<>(3, 0);
+                Pair<Integer, Integer> light = new Pair<>(3, 0);
+                Pair<Integer, Integer> mod = new Pair<>(3, 0);
+                Pair<Integer, Integer> heavy = new Pair<>(2, 0);
                 return new WoundMonitor(scratch, light, mod, heavy);
             }
 
             case 7: {
-                Pair<Integer, Integer> scratch = new Pair(3, 0);
-                Pair<Integer, Integer> light = new Pair(3, 0);
-                Pair<Integer, Integer> mod = new Pair(3, 0);
-                Pair<Integer, Integer> heavy = new Pair(3, 0);
+                Pair<Integer, Integer> scratch = new Pair<>(3, 0);
+                Pair<Integer, Integer> light = new Pair<>(3, 0);
+                Pair<Integer, Integer> mod = new Pair<>(3, 0);
+                Pair<Integer, Integer> heavy = new Pair<>(3, 0);
                 return new WoundMonitor(scratch, light, mod, heavy);
             }
         }

@@ -1,9 +1,10 @@
 package net.orb15.yafvt.character;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import net.orb15.yafvt.util.Usable;
 
-public class Character {
+import java.util.*;
+
+public class Character extends Usable {
 
     private Map<Skill, Integer> skillMap;
     private WoundMonitor wounds = WoundMonitor.defaultValued();
@@ -18,6 +19,8 @@ public class Character {
                         ArmorLevel currentArmor,
                         String name,
                         String propertySource) {
+
+        super();
         this.skillMap = skillMap;
         this.wounds = wounds;
         this.currentWeapon = currentWeapon;
