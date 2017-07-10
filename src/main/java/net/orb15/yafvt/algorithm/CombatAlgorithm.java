@@ -17,7 +17,8 @@ public class CombatAlgorithm {
 
     public enum AlgorithmType {
 
-        DEFAULT;
+        DEFAULT,
+        WOUNDS_MATTER;
     }
 
     public static BiFunction<Character, Character, WoundLevel> getCombatAlgorithm(AlgorithmType type) {
@@ -26,6 +27,9 @@ public class CombatAlgorithm {
 
             case DEFAULT:
                 return defaultCombatAlgorithm();
+
+            case WOUNDS_MATTER:
+                return woundsMatterCombatAlgorithm();
 
             default:
                 throw new UnsupportedOperationException("AlgorithmType: " + type + " is not supported");
@@ -49,7 +53,7 @@ public class CombatAlgorithm {
             int net = attTotal - defTotal;
             LOG.trace("Net roll: {}", net);
 
-            if(net <= 0)
+            if(net < 0)
                 return def.getCurrentWoundLevel();
 
             //attacker hit, deal with armor's DR
@@ -79,5 +83,73 @@ public class CombatAlgorithm {
 
             return defWounds;
         };
+    }
+
+    private static BiFunction<Character, Character, WoundLevel> woundsMatterCombatAlgorithm() {
+
+        return (att, def) -> {
+
+            Skill attWeaponInHand = att.getCurrentWeapon();
+            int attSkillLevel = att.getSkillValue(attWeaponInHand).get();
+
+            int defSkillLevel = def.getSkillValue(Skill.PHYSICAL_DEFENSE).get();
+            ArmorLevel defArmorLevel = def.getCurrentArmor();
+
+            int attTotal = DiceBag.dF.roll() + attSkillLevel - convertWoundLevelToModifier(att.getCurrentWoundLevel());
+            int defTotal = DiceBag.dF.roll() + defSkillLevel - convertWoundLevelToModifier(def.getCurrentWoundLevel());
+
+            int net = attTotal - defTotal;
+            LOG.trace("Net roll: {}", net);
+
+            if(net < 0)
+                return def.getCurrentWoundLevel();
+
+            //attacker hit, deal with armor's DR
+            int drNet = (int) (Math.ceil( (double)net / (double)(defArmorLevel.getValue())));
+            LOG.trace("Net roll after DR: {}", drNet);
+
+            //limit total net hits by attacker weapon
+            int finalNet;
+            switch(attWeaponInHand) {
+
+                case LIGHT_WEAPON:
+                case THROWN_WEAPON:
+                    finalNet = Math.min(drNet, 2);
+                    break;
+
+                case MEDIUM_WEAPON:
+                    finalNet = Math.min(drNet, 4);
+                    break;
+
+                default: //bows and heavy weapons have no limit
+                    finalNet = drNet;
+            }
+
+            WoundLevel defWounds = def.applyDamage(finalNet);
+            LOG.trace("Final net after weapon limiter: {} with defender {} wounds now at: {}",
+                    finalNet, def.getName(), defWounds);
+
+            return defWounds;
+        };
+    }
+
+    private static int convertWoundLevelToModifier(WoundLevel level) {
+
+        switch(level) {
+
+            case SCRATCHED:
+                return 1;
+
+            case LIGHT:
+                return 2;
+
+            case MODERATE:
+                return 3;
+
+            case HEAVY:
+                return 4;
+        }
+
+        return 0;
     }
 }

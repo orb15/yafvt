@@ -3,6 +3,7 @@ package net.orb15.yafvt.console;
 import net.orb15.yafvt.arena.Arena;
 import net.orb15.yafvt.arena.ArenaManager;
 import net.orb15.yafvt.util.PropertyFileLoader;
+import net.orb15.yafvt.util.ScriptFileLoader;
 import net.orb15.yafvt.util.SystemState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,14 +27,17 @@ public class CLIManager implements CommandLineRunner {
     private List<String> cmdHistory = new ArrayList<>();
     private SystemState state;
     private PropertyFileLoader propertyFileLoader;
+    private ScriptFileLoader scriptFileLoader;
     private ArenaManager arenaManager;
 
     private Map<Command, BiConsumer<Matcher, String>> cliMap;
 
     @Autowired
-    CLIManager(SystemState state, PropertyFileLoader propertyFileLoader, ArenaManager arenaManager) {
+    CLIManager(SystemState state, PropertyFileLoader propertyFileLoader,
+               ScriptFileLoader scriptFileLoader, ArenaManager arenaManager) {
         this.state = state;
         this.propertyFileLoader = propertyFileLoader;
+        this.scriptFileLoader = scriptFileLoader;
         this.arenaManager = arenaManager;
         loadMap();
     }
@@ -64,14 +68,20 @@ public class CLIManager implements CommandLineRunner {
         c = new Command("h([0-9]+)", "h{x}\t\t\t\t\tShow the last x commands");
         cliMap.put(c, this::showHistory);
 
+        c = new Command("l", "l\t\t\t\t\tRe-run the last command executed");
+        cliMap.put(c, this::rerunLast);
+
         c = new Command("help", "help\t\t\t\t\tShow this help text");
         cliMap.put(c, this::showHelp);
 
         c = new Command("\\?", "?\t\t\t\t\tShow this help text");
         cliMap.put(c, this::showHelp);
 
-        c = new Command("fight (.*) (.*) in (.*)", "fight {char1} {char2} in {arena}\t\t\tBegin a series of battles in an arena");
+        c = new Command("fight (.*) (.*) in (.*)", "fight {char1} {char2} in {arena}\tBegin a series of battles in an arena");
         cliMap.put(c, this::fight);
+
+        c = new Command("run script (.*)", "run script {scriptfile}\t\tLoad and run a script file");
+        cliMap.put(c, this::loadAndRunScript);
 
         c = new Command("state kill all", "state kill all\t\t\t\tCompletely reset system state");
         cliMap.put(c, this::killAllState);
@@ -223,6 +233,16 @@ public class CLIManager implements CommandLineRunner {
 
     }
 
+    private void rerunLast(Matcher m, String cmd) {
+
+        int size = cmdHistory.size();
+
+        if(size == 0)
+            return;
+
+        handleCommand(cmdHistory.get(0));
+    }
+
     private void loadCharacter(Matcher m, String cmd) {
 
         String propFileName = m.group(1);
@@ -277,6 +297,22 @@ public class CLIManager implements CommandLineRunner {
             arenaManager.runArena(arenaOpt.get(), char1Opt.get(), char2Opt.get());
 
             System.out.println("fight started");
+        }
+
+        cmdHistory.add(0,cmd);
+    }
+
+    private void loadAndRunScript(Matcher m, String cmd) {
+
+        String scriptFile = m.group(1);
+        List<String> commandList = scriptFileLoader.loadScriptFile(scriptFile);
+
+        int cmdCount = commandList.size();
+        if(cmdCount == 0)
+            System.out.println("Script file has no valid lines to execute");
+        else {
+            System.out.println("Loaded " + commandList.size() + " valid lines.  Executing...");
+            commandList.stream().forEach(s -> handleCommand(s));
         }
 
         cmdHistory.add(0,cmd);

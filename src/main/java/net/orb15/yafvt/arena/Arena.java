@@ -153,6 +153,8 @@ public class Arena extends Usable {
 
         int roundsElapsed = 0;
         WoundLevel defendersWounds = char2.getCurrentWoundLevel();
+        String winnerName = "UNDECIDED";
+        WoundLevel winnerWounds = WoundLevel.NONE;
 
         while( roundsElapsed < maxRoundsPerCombat ) {
 
@@ -160,15 +162,24 @@ public class Arena extends Usable {
             if(defendersWounds != WoundLevel.INCAPACITATED) {
                 defendersWounds = perRoundAlgo.apply(char2,char1);
                 if(defendersWounds == WoundLevel.INCAPACITATED) {
-                    LOG.trace("Char 1 is dead!");
+                    roundsElapsed++;
+                    winnerName = char2.getName();
+                    winnerWounds = char2.getCurrentWoundLevel();
+                    LOG.trace("Char 1 is killed during round {}!", roundsElapsed);
                     break;
                 }
             } else {
-                LOG.trace("Char 2 is dead!");
+                roundsElapsed++;
+                winnerName = char1.getName();
+                winnerWounds = char1.getCurrentWoundLevel();
+                LOG.trace("Char 2 is killed during round {}!", roundsElapsed);
                 break;
             }
 
             roundsElapsed++;
         }
+
+        LOG.debug("Battle ended after {} rounds of combat.  Won by {} with {} wounds",
+                roundsElapsed, winnerName, winnerWounds);
     }
 }

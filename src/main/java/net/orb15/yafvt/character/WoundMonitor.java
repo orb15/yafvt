@@ -105,21 +105,20 @@ public class WoundMonitor {
     
     public WoundLevel applyNetDamage(int netDamage) {
 
-        if(netDamage <= 0)
+        if(netDamage < 0)
             return woundLevel;
 
         switch(netDamage) {
 
-            case 1:
+            case 0:
                 LOG.debug("applying  wound: SCRATCH");
                 return applyScratch();
             
-            case 2:
-            case 3:
+            case 1:
                 LOG.debug("applying  wound: LIGHT");
                 return applyLight();
             
-            case 4:
+            case 2:
                 LOG.debug("applying  wound: MODERATE");
                 return applyModerate();
 
