@@ -2,8 +2,12 @@ package net.orb15.yafvt.character;
 
 import net.orb15.yafvt.util.Pair;
 import net.orb15.yafvt.util.YafvtException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WoundMonitor {
+
+    private static final Logger LOG = LoggerFactory.getLogger(WoundMonitor.class);
 
     private Pair<Integer, Integer> scratches;
     private Pair<Integer, Integer> lightWounds;
@@ -92,10 +96,11 @@ public class WoundMonitor {
     }
 
     public void healAllDamage() {
-        scratches.setR(scratches.getT());
-        lightWounds.setR(scratches.getT());
-        moderateWounds.setR(scratches.getT());
-        heavyWounds.setR(scratches.getT());
+        scratches.setR(0);
+        lightWounds.setR(0);
+        moderateWounds.setR(0);
+        heavyWounds.setR(0);
+        incapacitated = false;
     }
     
     public WoundLevel applyNetDamage(int netDamage) {
@@ -106,16 +111,20 @@ public class WoundMonitor {
         switch(netDamage) {
 
             case 1:
+                LOG.debug("applying  wound: SCRATCH");
                 return applyScratch();
             
             case 2:
             case 3:
+                LOG.debug("applying  wound: LIGHT");
                 return applyLight();
             
             case 4:
+                LOG.debug("applying  wound: MODERATE");
                 return applyModerate();
 
             default:
+                LOG.debug("applying  wound: HEAVY");
                 return applyHeavy();
         }
 
@@ -152,6 +161,7 @@ public class WoundMonitor {
         int max = scratches.getT();
         
         if(now == max) {
+            LOG.debug("Escalating wound to level: LIGHT");
             return applyLight();
         }
         
@@ -166,6 +176,7 @@ public class WoundMonitor {
         int max = lightWounds.getT();
 
         if(now == max) {
+            LOG.debug("Escalating wound to level: MODERATE");
             return applyModerate();
         }
 
@@ -180,6 +191,7 @@ public class WoundMonitor {
         int max = moderateWounds.getT();
 
         if(now == max) {
+            LOG.debug("Escalating wound to level: HEAVY");
             return applyHeavy();
         }
 
@@ -195,6 +207,7 @@ public class WoundMonitor {
 
         if(now == max) {
             incapacitated = true;
+            LOG.debug("Setting wounds to: INCAPACITATED after heavy damage exceeded");
             return WoundLevel.INCAPACITATED;
         } else {
             now++;

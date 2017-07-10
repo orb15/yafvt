@@ -277,8 +277,9 @@ public class CLIManager implements CommandLineRunner {
             arenaManager.runArena(arenaOpt.get(), char1Opt.get(), char2Opt.get());
 
             System.out.println("fight started");
-
         }
+
+        cmdHistory.add(0,cmd);
     }
 
     private Optional<Character> prepareCharacter(String charName) {

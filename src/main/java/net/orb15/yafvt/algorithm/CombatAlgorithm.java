@@ -53,7 +53,7 @@ public class CombatAlgorithm {
                 return def.getCurrentWoundLevel();
 
             //attacker hit, deal with armor's DR
-            int drNet = (int) Math.ceil(net / defArmorLevel.getValue());
+            int drNet = (int) (Math.ceil( (double)net / (double)(defArmorLevel.getValue())));
             LOG.trace("Net roll after DR: {}", drNet);
 
             //limit total net hits by attacker weapon
@@ -74,7 +74,8 @@ public class CombatAlgorithm {
             }
 
             WoundLevel defWounds = def.applyDamage(finalNet);
-            LOG.trace("Final net after weapon limiter: {} with defender wounds now at: {}", finalNet, defWounds);
+            LOG.trace("Final net after weapon limiter: {} with defender {} wounds now at: {}",
+                    finalNet, def.getName(), defWounds);
 
             return defWounds;
         };
