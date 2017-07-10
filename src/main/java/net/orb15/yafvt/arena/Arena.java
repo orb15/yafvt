@@ -27,6 +27,8 @@ public class Arena extends Usable {
     private String propertySource;
     private Map<String, String> configMap = new HashMap<>();
 
+    private ArenaStats arenaStats;
+
     private volatile boolean haltIterations;
 
     protected Arena(String name, String propertySource, Map<String, String> configMap) {
@@ -43,6 +45,9 @@ public class Arena extends Usable {
         char1.setInUse(true);
         char2.setInUse(true);
         setInUse(true);
+
+        arenaStats = new ArenaStats(char1.getName(), char1.getPropertySource(),
+                char2.getName(), char2.getPropertySource(), name, propertySource);
 
         String battlesToExecuteRaw= getConfigItem("iterations").orElse(DEFAULT_ITERATIONS);
         int battlesToExecute = 0;
@@ -145,7 +150,8 @@ public class Arena extends Usable {
     public String toString() {
         return "configMap=" + configMap +
                 "\nname=" + name +
-                "\npropertySource=" + propertySource;
+                "\npropertySource=" + propertySource +
+                "\nstats summary=" + arenaStats.getStatsSummary();
     }
 
     private void executeBattle(Character char1, Character char2,
@@ -155,12 +161,22 @@ public class Arena extends Usable {
         WoundLevel defendersWounds = char2.getCurrentWoundLevel();
         String winnerName = "UNDECIDED";
         WoundLevel winnerWounds = WoundLevel.NONE;
+        Character firstBlood = null;
 
         while( roundsElapsed < maxRoundsPerCombat ) {
 
             defendersWounds = perRoundAlgo.apply(char1,char2);
+
+            if(firstBlood == null && defendersWounds != WoundLevel.NONE)
+                firstBlood = char2;
+
             if(defendersWounds != WoundLevel.INCAPACITATED) {
+
                 defendersWounds = perRoundAlgo.apply(char2,char1);
+
+                if(firstBlood == null && defendersWounds != WoundLevel.NONE)
+                    firstBlood = char1;
+
                 if(defendersWounds == WoundLevel.INCAPACITATED) {
                     roundsElapsed++;
                     winnerName = char2.getName();
@@ -179,7 +195,9 @@ public class Arena extends Usable {
             roundsElapsed++;
         }
 
-        LOG.debug("Battle ended after {} rounds of combat.  Won by {} with {} wounds",
-                roundsElapsed, winnerName, winnerWounds);
+        LOG.debug("Battle ended after {} rounds of combat. {} won with {} wounds. {} was first injured.",
+                roundsElapsed, winnerName, winnerWounds, firstBlood.getName());
+
+        arenaStats.addBattleSummary(new BattleSummary(winnerName, winnerWounds, firstBlood.getName(), roundsElapsed));
     }
 }
