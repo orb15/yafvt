@@ -337,7 +337,7 @@ public class CLIManager implements CommandLineRunner {
 
             LOG.debug("Character {} does not exist and cannot be used in a battle.",
                     charName);
-            System.out.println("Character: " + charName + "has not been loaded");
+            System.out.println("Character: " + charName + " has not been loaded");
         }
 
         return Optional.ofNullable(character);
@@ -362,7 +362,7 @@ public class CLIManager implements CommandLineRunner {
 
             LOG.debug("Arena {} does not exist and cannot be used in a battle.",
                     arenaName);
-            System.out.println("Arena: " + arenaName + "has not been loaded");
+            System.out.println("Arena: " + arenaName + " has not been loaded");
         }
 
         return Optional.ofNullable(arena);
