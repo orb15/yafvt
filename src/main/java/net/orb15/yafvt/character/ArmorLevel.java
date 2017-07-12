@@ -3,11 +3,9 @@ package net.orb15.yafvt.character;
 public enum ArmorLevel {
 
     NONE(0),
-    SHIELD(1),
-    LIGHT(2),
-    MEDIUM(3),
-    HEAVY(4),
-    VERY_HEAVY(5);
+    LIGHT(1),
+    MEDIUM(2),
+    HEAVY(3);
 
     private int value;
 

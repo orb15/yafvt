@@ -3,10 +3,10 @@ package net.orb15.yafvt.character;
 public enum WoundLevel {
 
     NONE(0),
-    SCRATCHED(1),
-    LIGHT(2),
-    MODERATE(3),
-    HEAVY(4),
+    LIGHT(1),
+    MODERATE(2),
+    HEAVY(3),
+    SEVERE(4),
     INCAPACITATED(5);
 
     private int value;
