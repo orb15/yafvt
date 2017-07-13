@@ -1,4 +1,0 @@
-load char f1 as c1
-load char f1 as c2
-load arena a1 as a1
-fight c1 c2 in a1

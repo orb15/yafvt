@@ -17,7 +17,8 @@ public class CombatAlgorithm {
 
     public enum AlgorithmType {
 
-        DEFAULT;
+        DEFAULT,
+        USE_SHIELDS;
     }
 
     public static BiFunction<Character, Character, WoundLevel> getCombatAlgorithm(AlgorithmType type) {
@@ -26,6 +27,9 @@ public class CombatAlgorithm {
 
             case DEFAULT:
                 return defaultCombatAlgorithm();
+
+            case USE_SHIELDS:
+                return useShieldsCombatAlgorithm();
 
             default:
                 throw new UnsupportedOperationException("AlgorithmType: " + type + " is not supported");
@@ -74,6 +78,66 @@ public class CombatAlgorithm {
             //deal with armor's DR
             int finalNet = Math.max(weapNet - defArmorLevel.getValue(), 0);
             LOG.trace("Net roll after DR: {}", finalNet);
+
+            WoundLevel defWounds = def.applyDamage(finalNet);
+            LOG.trace("Final net: {} with defender {} wounds now at: {}",
+                    finalNet, def.getName(), defWounds);
+
+            return defWounds;
+        };
+    }
+
+    private static BiFunction<Character, Character, WoundLevel> useShieldsCombatAlgorithm() {
+
+        return (att, def) -> {
+
+            Skill attWeaponInHand = att.getCurrentWeapon();
+            int attSkillLevel = att.getSkillValue(attWeaponInHand).get();
+
+            int defSkillLevel = def.getSkillValue(Skill.PHYSICAL_DEFENSE).get();
+            ArmorLevel defArmorLevel = def.getCurrentArmor();
+
+            int attTotal = DiceBag.dF.roll() + attSkillLevel;
+            int defTotal = DiceBag.dF.roll() + defSkillLevel;
+
+            int net = attTotal - defTotal;
+            LOG.trace("Net roll: {}", net);
+
+            if(net < 0)
+                return def.getCurrentWoundLevel();
+
+            //limit total net hits by attacker weapon
+            int weapNet;
+            switch(attWeaponInHand) {
+
+                case LIGHT_WEAPON:
+                case THROWN_WEAPON:
+                    weapNet = Math.min(net, 2);
+                    break;
+
+                case MEDIUM_WEAPON:
+                    weapNet = Math.min(net, 3);
+                    break;
+
+                default: //bows and heavy weapons have no limit
+                    weapNet = net;
+            }
+
+            LOG.trace("Net roll after weapon limit: {}", weapNet);
+
+            //deal with armor's DR
+            int finalNet = Math.max(weapNet - defArmorLevel.getValue(), 0);
+            LOG.trace("Net roll after DR: {}", finalNet);
+
+            //deal with shield, if any
+            if(def.hasShield()) {
+                int roll = DiceBag.d3.roll();
+                if(roll == 3) { //same as a + on single dF die
+
+                    finalNet = Math.max(finalNet - 1, 0);
+                    LOG.trace("Net roll after Shield: {}", finalNet);
+                }
+            }
 
             WoundLevel defWounds = def.applyDamage(finalNet);
             LOG.trace("Final net: {} with defender {} wounds now at: {}",

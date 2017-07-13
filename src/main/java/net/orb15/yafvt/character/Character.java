@@ -12,11 +12,13 @@ public class Character extends Usable {
     private ArmorLevel currentArmor;
     private String name;
     private String propertySource;
+    private boolean hasShield;
 
     protected Character(Map<Skill, Integer> skillMap,
                         WoundMonitor wounds,
                         Skill currentWeapon,
                         ArmorLevel currentArmor,
+                        boolean hasShield,
                         String name,
                         String propertySource) {
 
@@ -25,6 +27,7 @@ public class Character extends Usable {
         this.wounds = wounds;
         this.currentWeapon = currentWeapon;
         this.currentArmor = currentArmor;
+        this.hasShield = hasShield;
         this.name = name;
         this.propertySource = propertySource;
     }
@@ -43,6 +46,10 @@ public class Character extends Usable {
 
     public ArmorLevel getCurrentArmor() {
         return currentArmor;
+    }
+
+    public boolean hasShield() {
+        return hasShield;
     }
 
     public WoundLevel getCurrentWoundLevel() {
@@ -70,6 +77,9 @@ public class Character extends Usable {
         //Wounds
         WoundMonitor wounds = WoundMonitor.forToughness(Integer.parseInt(props.getProperty("toughness")));
 
+        //shield
+        boolean hasShield = Boolean.parseBoolean(props.getProperty("shield"));
+
         //Skills
         Map<Skill, Integer> skillMap = new HashMap<>();
         Set<String> propSet = props.stringPropertyNames();
@@ -81,7 +91,7 @@ public class Character extends Usable {
                 });
 
         return new Character (skillMap, wounds, currentWeapon, currentArmor,
-                name, propFileName);
+                hasShield, name, propFileName);
 
     }
 
@@ -91,6 +101,7 @@ public class Character extends Usable {
                 "\nwounds=" + wounds +
                 "\ncurrentWeapon=" + currentWeapon +
                 "\ncurrentArmor=" + currentArmor +
+                "\nhasShield=" + hasShield +
                 "\nname=" + name +
                 "\npropertySource=" + propertySource;
     }
