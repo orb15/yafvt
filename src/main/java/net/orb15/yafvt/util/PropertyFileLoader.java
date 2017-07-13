@@ -1,7 +1,6 @@
 package net.orb15.yafvt.util;
 
 
-import net.orb15.yafvt.character.Character;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -44,7 +43,7 @@ public class PropertyFileLoader {
                 break;
 
             default:
-                throw new UnsupportedOperationException("PropertyFileType: " + type + " is not supported");
+                throw new YafvtException("PropertyFileType: " + type + " is not supported");
 
         }
 

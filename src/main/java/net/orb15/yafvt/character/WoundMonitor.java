@@ -37,41 +37,41 @@ public class WoundMonitor {
         switch(toughness) {
 
             case 1: {
-                Pair<Integer, Integer> light = new Pair<>(3, 0);
-                Pair<Integer, Integer> mod = new Pair<>(1, 0);
-                Pair<Integer, Integer> heavy = new Pair<>(1, 0);
+                Pair<Integer, Integer> light = new Pair<>(0, 0);
+                Pair<Integer, Integer> mod = new Pair<>(0, 0);
+                Pair<Integer, Integer> heavy = new Pair<>(0, 0);
                 Pair<Integer, Integer> severe = new Pair<>(1, 0);
                 return new WoundMonitor(light, mod, heavy, severe);
             }
 
             case 2: {
-                Pair<Integer, Integer> light = new Pair<>(3, 0);
-                Pair<Integer, Integer> mod = new Pair<>(2, 0);
+                Pair<Integer, Integer> light = new Pair<>(0, 0);
+                Pair<Integer, Integer> mod = new Pair<>(0, 0);
                 Pair<Integer, Integer> heavy = new Pair<>(1, 0);
                 Pair<Integer, Integer> severe = new Pair<>(1, 0);
                 return new WoundMonitor(light, mod, heavy, severe);
             }
 
             case 3: {
-                Pair<Integer, Integer> light = new Pair<>(3, 0);
-                Pair<Integer, Integer> mod = new Pair<>(3, 0);
+                Pair<Integer, Integer> light = new Pair<>(0, 0);
+                Pair<Integer, Integer> mod = new Pair<>(1, 0);
                 Pair<Integer, Integer> heavy = new Pair<>(1, 0);
                 Pair<Integer, Integer> severe = new Pair<>(1, 0);
                 return new WoundMonitor(light, mod, heavy, severe);
             }
 
             case 4: {
-                Pair<Integer, Integer> light = new Pair<>(3, 0);
-                Pair<Integer, Integer> mod = new Pair<>(3, 0);
-                Pair<Integer, Integer> heavy = new Pair<>(2, 0);
+                Pair<Integer, Integer> light = new Pair<>(1, 0);
+                Pair<Integer, Integer> mod = new Pair<>(1, 0);
+                Pair<Integer, Integer> heavy = new Pair<>(1, 0);
                 Pair<Integer, Integer> severe = new Pair<>(1, 0);
                 return new WoundMonitor(light, mod, heavy, severe);
             }
 
             case 5: {
-                Pair<Integer, Integer> light = new Pair<>(3, 0);
-                Pair<Integer, Integer> mod = new Pair<>(3, 0);
-                Pair<Integer, Integer> heavy = new Pair<>(3, 0);
+                Pair<Integer, Integer> light = new Pair<>(2, 0);
+                Pair<Integer, Integer> mod = new Pair<>(2, 0);
+                Pair<Integer, Integer> heavy = new Pair<>(1, 0);
                 Pair<Integer, Integer> severe = new Pair<>(1, 0);
                 return new WoundMonitor(light, mod, heavy, severe);
             }
@@ -79,12 +79,36 @@ public class WoundMonitor {
             case 6: {
                 Pair<Integer, Integer> light = new Pair<>(3, 0);
                 Pair<Integer, Integer> mod = new Pair<>(3, 0);
+                Pair<Integer, Integer> heavy = new Pair<>(1, 0);
+                Pair<Integer, Integer> severe = new Pair<>(1, 0);
+                return new WoundMonitor(light, mod, heavy, severe);
+            }
+
+            case 7: {
+                Pair<Integer, Integer> light = new Pair<>(3, 0);
+                Pair<Integer, Integer> mod = new Pair<>(3, 0);
+                Pair<Integer, Integer> heavy = new Pair<>(2, 0);
+                Pair<Integer, Integer> severe = new Pair<>(1, 0);
+                return new WoundMonitor(light, mod, heavy, severe);
+            }
+
+            case 8: {
+                Pair<Integer, Integer> light = new Pair<>(3, 0);
+                Pair<Integer, Integer> mod = new Pair<>(3, 0);
+                Pair<Integer, Integer> heavy = new Pair<>(3, 0);
+                Pair<Integer, Integer> severe = new Pair<>(1, 0);
+                return new WoundMonitor(light, mod, heavy, severe);
+            }
+
+            case 9: {
+                Pair<Integer, Integer> light = new Pair<>(3, 0);
+                Pair<Integer, Integer> mod = new Pair<>(3, 0);
                 Pair<Integer, Integer> heavy = new Pair<>(3, 0);
                 Pair<Integer, Integer> severe = new Pair<>(2, 0);
                 return new WoundMonitor(light, mod, heavy, severe);
             }
 
-            case 7: {
+            case 10: {
                 Pair<Integer, Integer> light = new Pair<>(3, 0);
                 Pair<Integer, Integer> mod = new Pair<>(3, 0);
                 Pair<Integer, Integer> heavy = new Pair<>(3, 0);

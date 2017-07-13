@@ -8,6 +8,7 @@ import net.orb15.yafvt.character.ArmorLevel;
 import net.orb15.yafvt.character.Character;
 import net.orb15.yafvt.character.Skill;
 import net.orb15.yafvt.character.WoundLevel;
+import net.orb15.yafvt.util.YafvtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ public class CombatAlgorithm {
                 return useShieldsCombatAlgorithm();
 
             default:
-                throw new UnsupportedOperationException("AlgorithmType: " + type + " is not supported");
+                throw new YafvtException("AlgorithmType: " + type + " is not supported");
         }
 
     }
