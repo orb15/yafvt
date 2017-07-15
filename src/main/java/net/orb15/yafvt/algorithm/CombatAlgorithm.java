@@ -19,7 +19,7 @@ public class CombatAlgorithm {
     public enum AlgorithmType {
 
         DEFAULT,
-        USE_SHIELDS;
+        USE_SHIELD;
     }
 
     public static BiFunction<Character, Character, WoundLevel> getCombatAlgorithm(AlgorithmType type) {
@@ -29,7 +29,7 @@ public class CombatAlgorithm {
             case DEFAULT:
                 return defaultCombatAlgorithm();
 
-            case USE_SHIELDS:
+            case USE_SHIELD:
                 return useShieldsCombatAlgorithm();
 
             default:
@@ -133,11 +133,13 @@ public class CombatAlgorithm {
             //deal with shield, if any
             if(def.hasShield()) {
                 int roll = DiceBag.d3.roll();
-                if(roll == 3) { //same as a + on single dF die
+                if(roll >= 2) { //same as a blank or + on single dF die
 
                     finalNet = Math.max(finalNet - 1, 0);
                     LOG.trace("Net roll after Shield: {}", finalNet);
                 }
+            } else {
+                LOG.trace("Defender has no shield");
             }
 
             WoundLevel defWounds = def.applyDamage(finalNet);
