@@ -1,4 +1,0 @@
-load char 4_4_shield as c1
-load char 4_4_shield as c2
-load arena shield as a1
-fight c1 c2 in a1

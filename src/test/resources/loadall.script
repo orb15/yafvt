@@ -1,6 +1,9 @@
 load char 4_4 as c1
+load char 4_4 as c1a
 load char 4_4_heavyweap as c1heavy
 load char 4_4_shield as c1shield
 load char 5_4 as c2
+load char 4_4_light as c3
 load arena shield as a1
 load arena singleshield as a2
+load arena newweap as a3

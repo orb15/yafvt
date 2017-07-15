@@ -243,7 +243,7 @@ public class WoundMonitor {
     @Override
     public String toString() {
         return "WoundMonitor{" +
-                ", lightWounds=" + lightWounds +
+                "lightWounds=" + lightWounds +
                 ", moderateWounds=" + moderateWounds +
                 ", heavyWounds=" + heavyWounds +
                 "severeWounds=" + severeWounds +
